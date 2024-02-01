@@ -6,4 +6,6 @@ export type Maybe<T> = T | Branded<'Maybe'>;
 
 export type UserId = Branded<'UserId'>;
 
+export type UserProfileId = Branded<'UserProfileId'>;
+
 export type TaskId = Branded<'TaskId'>;

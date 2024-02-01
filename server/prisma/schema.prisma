@@ -14,3 +14,13 @@ model Task {
   done      Boolean
   createdAt DateTime
 }
+
+model UserProfile {
+  id           String @id
+  userId       String @unique
+  height       Int
+  weight       Int
+  age          Int
+  targetWeight Int
+  gender       String
+}
