@@ -47,19 +47,30 @@ const Home = () => {
     fetchTasks();
   }, [user]);
 
+  const createUserProfile = async () => {
+    const body = {
+      height: 170,
+      weight: 60,
+      age: 20,
+      targetWeight: 55,
+      gender: 'women',
+    };
+    await apiClient.userProfile.$post({ body });
+  };
+
+  const fetchUserProfile = async () => {
+    const userProfile = await apiClient.userProfile.$get();
+    console.log('aaa', userProfile);
+  };
+
   if (!tasks || !user) return <Loading visible />;
 
   return (
     <>
       <BasicHeader user={user} />
-      <div className={styles.title} style={{ marginTop: '160px' }}>
-        Welcome to frourio!
-      </div>
+      <button onClick={createUserProfile}>Create User Profile</button>
+      <button onClick={fetchUserProfile}>Fetch User Profile</button>
 
-      <form style={{ textAlign: 'center', marginTop: '80px' }} onSubmit={createTask}>
-        <input value={label} type="text" onChange={inputLabel} />
-        <input type="submit" value="ADD" />
-      </form>
       <ul className={styles.tasks}>
         {tasks.map((task) => (
           <li key={task.id}>
