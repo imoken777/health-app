@@ -1,61 +1,48 @@
-import type { TaskModel } from 'commonTypesWithClient/models';
 import { useAtom } from 'jotai';
-import type { ChangeEvent, FormEvent } from 'react';
-import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { Loading } from 'src/components/Loading/Loading';
 import { BasicHeader } from 'src/pages/@components/BasicHeader/BasicHeader';
 import { apiClient } from 'src/utils/apiClient';
-import { returnNull } from 'src/utils/returnNull';
 import { userAtom } from '../atoms/user';
-import styles from './index.module.css';
+import { InputField } from './@components/InputField/InputField';
+
+export type FormDataType = {
+  height: number;
+  weight: number;
+  age: number;
+  targetWeight: number;
+  gender: string;
+};
 
 const Home = () => {
   const [user] = useAtom(userAtom);
-  const [tasks, setTasks] = useState<TaskModel[]>();
-  const [label, setLabel] = useState('');
-  const inputLabel = (e: ChangeEvent<HTMLInputElement>) => {
-    setLabel(e.target.value);
-  };
-  const fetchTasks = async () => {
-    const tasks = await apiClient.tasks.$get().catch(returnNull);
-
-    if (tasks !== null) setTasks(tasks);
-  };
-  const createTask = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!label) return;
-
-    await apiClient.tasks.post({ body: { label } }).catch(returnNull);
-    setLabel('');
-    await fetchTasks();
-  };
-  const toggleDone = async (task: TaskModel) => {
-    await apiClient.tasks
-      ._taskId(task.id)
-      .patch({ body: { done: !task.done } })
-      .catch(returnNull);
-    await fetchTasks();
-  };
-  const deleteTask = async (task: TaskModel) => {
-    await apiClient.tasks._taskId(task.id).delete().catch(returnNull);
-    await fetchTasks();
-  };
-
-  useEffect(() => {
-    if (!user) return;
-
-    fetchTasks();
-  }, [user]);
-
-  const createUserProfile = async () => {
-    const body = {
-      height: 170,
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormDataType>({
+    defaultValues: {
+      height: 160,
       weight: 60,
       age: 20,
       targetWeight: 55,
       gender: 'women',
+    },
+  });
+
+  const onSubmit = async (data: FormDataType) => {
+    const processedData = {
+      ...data,
+      height: Number(data.height),
+      weight: Number(data.weight),
+      age: Number(data.age),
+      targetWeight: Number(data.targetWeight),
     };
-    await apiClient.userProfile.$post({ body });
+    try {
+      await apiClient.userProfile.$post({ body: processedData });
+    } catch (error) {
+      console.error('Failed to create user profile', error);
+    }
   };
 
   const fetchUserProfile = async () => {
@@ -63,30 +50,49 @@ const Home = () => {
     console.log('aaa', userProfile);
   };
 
-  if (!tasks || !user) return <Loading visible />;
+  if (!user) return <Loading visible={true} />;
 
   return (
     <>
       <BasicHeader user={user} />
-      <button onClick={createUserProfile}>Create User Profile</button>
-      <button onClick={fetchUserProfile}>Fetch User Profile</button>
+      <InputField
+        label="身長"
+        id="height"
+        register={register}
+        requiredMessage="身長の入力は必須です"
+        errors={errors}
+      />
+      <InputField
+        label="体重"
+        id="weight"
+        register={register}
+        requiredMessage="体重の入力は必須です"
+        errors={errors}
+      />
+      <InputField
+        label="年齢"
+        id="age"
+        register={register}
+        requiredMessage="年齢の入力は必須です"
+        errors={errors}
+      />
+      <InputField
+        label="目標体重"
+        id="targetWeight"
+        register={register}
+        requiredMessage="目標体重の入力は必須です"
+        errors={errors}
+      />
+      <InputField
+        label="性別"
+        id="gender"
+        register={register}
+        requiredMessage="性別の入力は必須です"
+        errors={errors}
+      />
+      <button onClick={handleSubmit(onSubmit)}>登録</button>
 
-      <ul className={styles.tasks}>
-        {tasks.map((task) => (
-          <li key={task.id}>
-            <label>
-              <input type="checkbox" checked={task.done} onChange={() => toggleDone(task)} />
-              <span>{task.label}</span>
-            </label>
-            <input
-              type="button"
-              value="DELETE"
-              className={styles.deleteBtn}
-              onClick={() => deleteTask(task)}
-            />
-          </li>
-        ))}
-      </ul>
+      <button onClick={fetchUserProfile}>ユーザープロフィールを取得</button>
     </>
   );
 };
