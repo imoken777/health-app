@@ -1,0 +1,44 @@
+-- DropForeignKey
+ALTER TABLE "Like" DROP CONSTRAINT "Like_SNSPostId_fkey";
+
+-- DropForeignKey
+ALTER TABLE "MealMenu" DROP CONSTRAINT "MealMenu_SNSId_fkey";
+
+-- DropForeignKey
+ALTER TABLE "Month" DROP CONSTRAINT "Month_SNSId_fkey";
+
+-- DropForeignKey
+ALTER TABLE "Movement" DROP CONSTRAINT "Movement_SNSId_fkey";
+
+-- DropForeignKey
+ALTER TABLE "WeightHistory" DROP CONSTRAINT "WeightHistory_SNSId_fkey";
+
+-- AlterTable
+ALTER TABLE "Like" ALTER COLUMN "SNSPostId" DROP NOT NULL;
+
+-- AlterTable
+ALTER TABLE "MealMenu" ALTER COLUMN "SNSId" DROP NOT NULL;
+
+-- AlterTable
+ALTER TABLE "Month" ALTER COLUMN "SNSId" DROP NOT NULL;
+
+-- AlterTable
+ALTER TABLE "Movement" ALTER COLUMN "SNSId" DROP NOT NULL;
+
+-- AlterTable
+ALTER TABLE "WeightHistory" ALTER COLUMN "SNSId" DROP NOT NULL;
+
+-- AddForeignKey
+ALTER TABLE "Month" ADD CONSTRAINT "Month_SNSId_fkey" FOREIGN KEY ("SNSId") REFERENCES "SNSPost"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "MealMenu" ADD CONSTRAINT "MealMenu_SNSId_fkey" FOREIGN KEY ("SNSId") REFERENCES "SNSPost"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Movement" ADD CONSTRAINT "Movement_SNSId_fkey" FOREIGN KEY ("SNSId") REFERENCES "SNSPost"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "WeightHistory" ADD CONSTRAINT "WeightHistory_SNSId_fkey" FOREIGN KEY ("SNSId") REFERENCES "SNSPost"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Like" ADD CONSTRAINT "Like_SNSPostId_fkey" FOREIGN KEY ("SNSPostId") REFERENCES "SNSPost"("id") ON DELETE SET NULL ON UPDATE CASCADE;
