@@ -1,21 +1,13 @@
 import type { Gender, MealType } from '@prisma/client';
 import { z } from 'zod';
 import { taskIdParser } from '../service/idParsers';
-import type { UserId, UserProfileId } from './ids';
+import type { UserId } from './ids';
 
 export type UserModel = {
   id: UserId;
   email: string;
   displayName: string | undefined;
   photoURL: string | undefined;
-};
-
-export type UserProfileModel = {
-  id: UserProfileId;
-  userId: UserId;
-  height: number;
-  targetWeight: number;
-  gender: string;
 };
 
 export const taskParser = z.object({
@@ -27,117 +19,89 @@ export const taskParser = z.object({
 
 export type TaskModel = z.infer<typeof taskParser>;
 
-export type UserProfile = {
-  userId: string;
+export type UserProfileModel = {
+  id: string;
   userName: string;
-  height: number;
   gender: Gender;
-  targetWeight: number;
   birthday: Date;
-  Month: Month[];
-  WeightHistory: WeightHistory[];
-  BookMark: BookMark[];
 };
 
-export type Month = {
+export type MonthModel = {
   id: string;
   month: number;
   userId: string;
-  user: UserProfile;
-  Days: Day[];
   SNSId?: string;
-  SNSPost?: SNSPost;
 };
 
-export type Day = {
+export type DayModel = {
   id: string;
   day: number;
   monthId: string;
-  month: Month;
-  MealMenus: MealMenu[];
-  Movements: Movement[];
 };
 
-export type Ingredient = {
+export type IngredientModel = {
   id: string;
   name: string;
   amount: number;
   recipeId: string;
-  Recipe: Recipe;
 };
 
-export type Recipe = {
+export type RecipeModel = {
   id: string;
   name: string;
   memo: string;
-  ingredients: Ingredient[];
-  MealMenus: MealMenuRecipe[];
 };
 
-export type MealMenu = {
+export type MealMenuModel = {
   id: string;
   mealType: MealType;
   date: Date;
   time: Date;
-  Recipes: MealMenuRecipe[];
   dayId: string;
-  Day: Day;
   SNSId?: string;
-  SNSPost?: SNSPost;
 };
 
-export type MealMenuRecipe = {
+export type MealMenuRecipeModel = {
   id: string;
   RecipeId: string;
   MealMenuId: string;
-  Recipe: Recipe;
-  MealMenu: MealMenu;
 };
 
-export type Movement = {
+export type MovementModel = {
   id: string;
   name: string;
   duration: number;
   time: Date;
   dayId: string;
-  day: Day;
   SNSId?: string;
-  SNSPost?: SNSPost;
 };
 
-export type WeightHistory = {
+export type PhysiqueHistoryModel = {
   weight: number;
+  height: number;
+  targetWeight: number;
   day: Date;
   userId: string;
-  user: UserProfile;
   SNSId?: string;
-  SNSPost?: SNSPost;
 };
 
-export type BookMark = {
+export type BookMarkModel = {
   id: string;
   name: string;
   userId: string;
-  user: UserProfile;
 };
 
-export type SNSPost = {
+export type SNSPostModel = {
   id: string;
   userId: string;
   postedAt: Date;
-  post?: WeightHistory;
-  Month?: Month;
-  MealMenu?: MealMenu;
-  Movement?: Movement;
-  Likes: Reaction[];
   monthId?: string;
   mealMenuId?: string;
   movementId?: string;
 };
 
-export type Reaction = {
+export type ReactionModel = {
   userId: string;
   reaction: string;
   SNSPostId?: string;
-  SNSPost?: SNSPost;
 };
