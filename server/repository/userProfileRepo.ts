@@ -2,39 +2,26 @@ import type { UserId, UserProfileId } from '$/commonTypesWithClient/ids';
 import type { UserProfileModel } from '$/commonTypesWithClient/models';
 import { userIdParser, userProfileIdParser } from '$/service/idParsers';
 import { prismaClient } from '$/service/prismaClient';
-import type { UserProfile } from '@prisma/client';
+import type { UserProfile as PrismaUserProfile } from '@prisma/client';
+import { Gender } from '@prisma/client';
 import { z } from 'zod';
 
 // UserProfiles
-const toUserProfileModel = (prismaUserProfile: UserProfile): UserProfileModel => ({
+const toUserProfileModel = (prismaUserProfile: PrismaUserProfile): UserProfileModel => ({
   id: userProfileIdParser.parse(prismaUserProfile.id),
-  userId: userIdParser.parse(prismaUserProfile.userId),
-  height: z.number().parse(prismaUserProfile.height),
-  weight: z.number().parse(prismaUserProfile.weight),
-  age: z.number().parse(prismaUserProfile.age),
-  targetWeight: z.number().parse(prismaUserProfile.targetWeight),
-  gender: z.string().parse(prismaUserProfile.gender),
+  userName: userIdParser.parse(prismaUserProfile.userName),
+  gender: z.nativeEnum(Gender).parse(prismaUserProfile.gender),
+  birthday: z.date().parse(prismaUserProfile.birthday),
 });
 
 export const userProfileRepo = {
-  save: async (userProfile: UserProfileModel) => {
-    const prismaUserProfile = await prismaClient.userProfile.upsert({
-      where: { id: userProfile.id },
-      create: {
+  create: async (userProfile: UserProfileModel) => {
+    const prismaUserProfile = await prismaClient.userProfile.create({
+      data: {
         id: userProfile.id,
-        userId: userProfile.userId,
-        height: userProfile.height,
-        weight: userProfile.weight,
-        age: userProfile.age,
-        targetWeight: userProfile.targetWeight,
+        userName: userProfile.id,
         gender: userProfile.gender,
-      },
-      update: {
-        height: userProfile.height,
-        weight: userProfile.weight,
-        age: userProfile.age,
-        targetWeight: userProfile.targetWeight,
-        gender: userProfile.gender,
+        birthday: userProfile.birthday,
       },
     });
     return toUserProfileModel(prismaUserProfile);
@@ -51,7 +38,7 @@ export const userProfileRepo = {
   getByUserId: async (userId: UserId): Promise<UserProfileModel | null> => {
     try {
       const prismaUserProfile = await prismaClient.userProfile.findUnique({
-        where: { userId },
+        where: { id: userId },
       });
       if (prismaUserProfile === null) {
         return null;
