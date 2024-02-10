@@ -17,19 +17,17 @@ model Task {
 
 enum Gender {
   Male
-  Fimale
+  Female
   Other
 }
 
 model UserProfile {
-  userId        String          @id @default(uuid())
-  userName      String          @unique
-  height        Int
+  id            String            @id @default(uuid()) @map("userId")
+  userName      String            @map("userName")
   gender        Gender
-  targetWeight  Int
   birthday      DateTime
   Month         Month[]
-  WeightHistory WeightHistory[]
+  WeightHistory PhysiqueHistory[]
   BookMark      BookMark[]
 }
 
@@ -37,7 +35,7 @@ model Month {
   id      String      @id @default(uuid())
   month   Int
   userId  String
-  user    UserProfile @relation(fields: [userId], references: [userId])
+  user    UserProfile @relation(fields: [userId], references: [id])
   Days    Day[]
   SNSId   String?     @unique
   SNSPost SNSPost?    @relation(fields: [SNSId], references: [id])
@@ -106,29 +104,32 @@ model Movement {
   SNSPost  SNSPost? @relation(fields: [SNSId], references: [id])
 }
 
-model WeightHistory {
-  weight  Float
-  day     DateTime
-  userId  String
-  user    UserProfile @relation(fields: [userId], references: [userId])
-  SNSId   String?     @unique
-  SNSPost SNSPost?    @relation(fields: [SNSId], references: [id])
+model PhysiqueHistory {
+  weight       Float
+  height       Float
+  targetWeight Float
+  day          DateTime
+  userId       String
+  user         UserProfile @relation(fields: [userId], references: [id])
+  SNSId        String?     @unique
+  SNSPost      SNSPost?    @relation(fields: [SNSId], references: [id])
 
   @@id([day, userId])
+  @@map("WeightHistory")
 }
 
 model BookMark {
   id     String      @id @default(uuid())
   name   String
   userId String
-  user   UserProfile @relation(fields: [userId], references: [userId])
+  user   UserProfile @relation(fields: [userId], references: [id])
 }
 
 model SNSPost {
-  id         String         @id @unique @default(uuid())
+  id         String           @id @unique @default(uuid())
   userId     String
-  postedAt   DateTime       @default(now())
-  post       WeightHistory?
+  postedAt   DateTime         @default(now())
+  post       PhysiqueHistory?
   Month      Month?
   MealMenu   MealMenu?
   Movement   Movement?
