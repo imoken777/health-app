@@ -1,4 +1,5 @@
 import type { UserProfileModel } from '$../../commonTypesWithClient/models';
+import type { Gender } from '@prisma/client';
 import type { DefineMethods } from 'aspida';
 
 export type Methods = DefineMethods<{
@@ -7,12 +8,10 @@ export type Methods = DefineMethods<{
   };
   post: {
     reqBody: {
-      height: number;
-      weight: number;
-      age: number;
-      targetWeight: number;
-      gender: string;
+      birthday: number;
+      gender: Gender;
     };
     resBody: UserProfileModel;
   };
+  delete: { resBody: UserProfileModel };
 }>;

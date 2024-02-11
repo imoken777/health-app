@@ -1,6 +1,6 @@
-import type { UserId, UserProfileId } from '$/commonTypesWithClient/ids';
+import type { UserId } from '$/commonTypesWithClient/ids';
 import type { UserProfileModel } from '$/commonTypesWithClient/models';
-import { userIdParser, userProfileIdParser } from '$/service/idParsers';
+import { userIdParser } from '$/service/idParsers';
 import { prismaClient } from '$/service/prismaClient';
 import type { UserProfile as PrismaUserProfile } from '@prisma/client';
 import { Gender } from '@prisma/client';
@@ -8,10 +8,10 @@ import { z } from 'zod';
 
 // UserProfiles
 const toUserProfileModel = (prismaUserProfile: PrismaUserProfile): UserProfileModel => ({
-  id: userProfileIdParser.parse(prismaUserProfile.id),
-  userName: userIdParser.parse(prismaUserProfile.userName),
+  id: userIdParser.parse(prismaUserProfile.id),
+  userName: z.string().parse(prismaUserProfile.userName),
   gender: z.nativeEnum(Gender).parse(prismaUserProfile.gender),
-  birthday: z.date().parse(prismaUserProfile.birthday),
+  birthday: prismaUserProfile.birthday.getTime(),
 });
 
 export const userProfileRepo = {
@@ -19,20 +19,11 @@ export const userProfileRepo = {
     const prismaUserProfile = await prismaClient.userProfile.create({
       data: {
         id: userProfile.id,
-        userName: userProfile.id,
+        userName: userProfile.userName,
         gender: userProfile.gender,
-        birthday: userProfile.birthday,
+        birthday: new Date(userProfile.birthday),
       },
     });
-    return toUserProfileModel(prismaUserProfile);
-  },
-  getByUserProfileId: async (userProfileId: UserProfileId): Promise<UserProfileModel | null> => {
-    const prismaUserProfile = await prismaClient.userProfile.findUnique({
-      where: { id: userProfileId },
-    });
-    if (prismaUserProfile === null) {
-      return null;
-    }
     return toUserProfileModel(prismaUserProfile);
   },
   getByUserId: async (userId: UserId): Promise<UserProfileModel | null> => {
@@ -48,5 +39,11 @@ export const userProfileRepo = {
       console.error(e);
       return null;
     }
+  },
+  delete: async (userId: UserId) => {
+    const prismaUserProfile = await prismaClient.userProfile.delete({
+      where: { id: userId },
+    });
+    return toUserProfileModel(prismaUserProfile);
   },
 };

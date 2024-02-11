@@ -7,7 +7,7 @@ export const UserProfileUseCase = {
   create: async (
     userId: UserId,
     userName: string,
-    birthday: Date,
+    birthday: number,
     gender: Gender
   ): Promise<UserProfileModel> => {
     const userProfileData: UserProfileModel = {
@@ -16,7 +16,6 @@ export const UserProfileUseCase = {
       birthday,
       gender,
     };
-
     await userProfileRepo.create(userProfileData);
     return userProfileData;
   },

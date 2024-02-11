@@ -1,5 +1,7 @@
 import { userProfileRepo } from '$/repository/userProfileRepo';
 import { UserProfileUseCase } from '$/useCase/userProfileUseCase';
+import { Gender } from '@prisma/client';
+import { z } from 'zod';
 import { defineController } from './$relay';
 
 export default defineController(() => ({
@@ -7,15 +9,22 @@ export default defineController(() => ({
     status: 200,
     body: await userProfileRepo.getByUserId(user.id),
   }),
-  post: async ({ user, body }) => ({
-    status: 200,
-    body: await UserProfileUseCase.create(
-      user.id,
-      body.height,
-      body.weight,
-      body.age,
-      body.targetWeight,
-      body.gender
-    ),
-  }),
+  post: {
+    validators: {
+      body: z.object({
+        birthday: z.number(),
+        gender: z.nativeEnum(Gender),
+      }),
+    },
+    handler: async ({ user, body }) => ({
+      status: 200,
+      body: await UserProfileUseCase.create(
+        user.id,
+        user.displayName ?? 'noName',
+        body.birthday,
+        body.gender
+      ),
+    }),
+  },
+  delete: async ({ user }) => ({ status: 204, body: await userProfileRepo.delete(user.id) }),
 }));
