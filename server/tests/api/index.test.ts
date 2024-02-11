@@ -20,6 +20,18 @@ test('認証確認', async () => {
   expect(res.email).toBe(testUser.email);
 });
 
+test('userProfile確認', async () => {
+  const userProfileMock: { birthday: number; gender: 'Male' } = {
+    birthday: 0,
+    gender: 'Male',
+  };
+  const res1 = await apiClient.userProfile.post({ body: userProfileMock });
+  expect(res1.status).toBe(200);
+  const res2 = await apiClient.userProfile.$get();
+  expect(res2?.birthday).toBe(userProfileMock.birthday);
+  expect(res2?.gender).toBe(userProfileMock.gender);
+});
+
 test('依存性注入', async () => {
   const res1 = await controller(fastify()).get({
     user: { id: 'dummy-userId' } as UserModel,
