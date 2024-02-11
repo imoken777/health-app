@@ -1,92 +1,34 @@
-import type { TaskModel } from 'commonTypesWithClient/models';
+import type { UserProfileModel } from 'commonTypesWithClient/models';
 import { useAtom } from 'jotai';
-import type { ChangeEvent, FormEvent } from 'react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Loading } from 'src/components/Loading/Loading';
 import { BasicHeader } from 'src/pages/@components/BasicHeader/BasicHeader';
 import { apiClient } from 'src/utils/apiClient';
-import { returnNull } from 'src/utils/returnNull';
 import { userAtom } from '../atoms/user';
-import styles from './index.module.css';
+type Gender = 'Male' | 'Female' | 'Other';
 
 const Home = () => {
   const [user] = useAtom(userAtom);
-  const [tasks, setTasks] = useState<TaskModel[]>();
-  const [label, setLabel] = useState('');
-  const inputLabel = (e: ChangeEvent<HTMLInputElement>) => {
-    setLabel(e.target.value);
-  };
-  const fetchTasks = async () => {
-    const tasks = await apiClient.tasks.$get().catch(returnNull);
-
-    if (tasks !== null) setTasks(tasks);
-  };
-  const createTask = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!label) return;
-
-    await apiClient.tasks.post({ body: { label } }).catch(returnNull);
-    setLabel('');
-    await fetchTasks();
-  };
-  const toggleDone = async (task: TaskModel) => {
-    await apiClient.tasks
-      ._taskId(task.id)
-      .patch({ body: { done: !task.done } })
-      .catch(returnNull);
-    await fetchTasks();
-  };
-  const deleteTask = async (task: TaskModel) => {
-    await apiClient.tasks._taskId(task.id).delete().catch(returnNull);
-    await fetchTasks();
-  };
-
-  useEffect(() => {
-    if (!user) return;
-
-    fetchTasks();
-  }, [user]);
-
+  const [userProfile, setUserProfile] = useState<UserProfileModel>();
   const createUserProfile = async () => {
-    const body = {
-      height: 170,
-      weight: 60,
-      age: 20,
-      targetWeight: 55,
-      gender: 'women',
+    const body: { gender: Gender; birthday: number } = {
+      gender: 'Male',
+      birthday: Date.now(),
     };
     await apiClient.userProfile.$post({ body });
   };
 
   const fetchUserProfile = async () => {
-    const userProfile = await apiClient.userProfile.$get();
-    console.log('aaa', userProfile);
+    const res = await apiClient.userProfile.$get();
+    if (res === null) return;
+    setUserProfile(res);
   };
-
-  if (!tasks || !user) return <Loading visible />;
-
+  if (user === null) return <Loading visible={true} />;
   return (
     <>
       <BasicHeader user={user} />
       <button onClick={createUserProfile}>Create User Profile</button>
       <button onClick={fetchUserProfile}>Fetch User Profile</button>
-
-      <ul className={styles.tasks}>
-        {tasks.map((task) => (
-          <li key={task.id}>
-            <label>
-              <input type="checkbox" checked={task.done} onChange={() => toggleDone(task)} />
-              <span>{task.label}</span>
-            </label>
-            <input
-              type="button"
-              value="DELETE"
-              className={styles.deleteBtn}
-              onClick={() => deleteTask(task)}
-            />
-          </li>
-        ))}
-      </ul>
     </>
   );
 };
