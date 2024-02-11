@@ -23,7 +23,7 @@ export type UserProfileModel = {
   id: string;
   userName: string;
   gender: Gender;
-  birthday: Date;
+  birthday: number;
 };
 
 export type MonthModel = {
