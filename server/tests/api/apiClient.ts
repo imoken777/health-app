@@ -4,7 +4,7 @@ import aspida from '@aspida/axios';
 import axios from 'axios';
 import { initializeApp } from 'firebase/app';
 import {
-  GithubAuthProvider,
+  GoogleAuthProvider,
   connectAuthEmulator,
   getAuth,
   signInWithCredential,
@@ -24,7 +24,7 @@ beforeAll(async () => {
   connectAuthEmulator(auth, `http://${FIREBASE_AUTH_EMULATOR_HOST}`, { disableWarnings: true });
   const result = await signInWithCredential(
     auth,
-    GithubAuthProvider.credential(JSON.stringify({ sub: testUser.name, email: testUser.email }))
+    GoogleAuthProvider.credential(JSON.stringify({ sub: testUser.name, email: testUser.email }))
   );
   const idToken = await result.user.getIdToken();
   const res = await apiClient.session.post({ body: { idToken } });

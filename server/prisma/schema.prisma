@@ -15,12 +15,133 @@ model Task {
   createdAt DateTime
 }
 
+enum Gender {
+  Male
+  Female
+  Other
+}
+
 model UserProfile {
-  id           String @id
-  userId       String @unique
-  height       Int
-  weight       Int
-  age          Int
-  targetWeight Int
-  gender       String
+  id            String            @id @default(uuid()) @map("userId")
+  userName      String            @map("userName")
+  gender        Gender
+  birthday      DateTime
+  Month         Month[]
+  WeightHistory PhysiqueHistory[]
+  BookMark      BookMark[]
+}
+
+model Month {
+  id      String      @id @default(uuid())
+  month   Int
+  userId  String
+  user    UserProfile @relation(fields: [userId], references: [id])
+  Days    Day[]
+  SNSId   String?     @unique
+  SNSPost SNSPost?    @relation(fields: [SNSId], references: [id])
+}
+
+model Day {
+  id        String     @id @default(uuid())
+  day       Int
+  monthId   String
+  month     Month      @relation(fields: [monthId], references: [id])
+  MealMenus MealMenu[]
+  Movements Movement[]
+}
+
+model Ingredient {
+  id       String @id @default(uuid())
+  name     String
+  amount   Float
+  recipeId String
+  Recipe   Recipe @relation(fields: [recipeId], references: [id])
+}
+
+model Recipe {
+  id          String           @id @default(uuid())
+  name        String
+  memo        String
+  ingredients Ingredient[]
+  MealMenus   MealMenuRecipe[]
+}
+
+enum MealType {
+  Breakfast
+  Lunch
+  Dinner
+  Snack
+}
+
+model MealMenu {
+  id       String           @id @default(uuid())
+  mealType MealType
+  date     DateTime
+  time     DateTime
+  Recipes  MealMenuRecipe[]
+  dayId    String
+  Day      Day              @relation(fields: [dayId], references: [id])
+  SNSId    String?          @unique
+  SNSPost  SNSPost?         @relation(fields: [SNSId], references: [id])
+}
+
+model MealMenuRecipe {
+  id         String   @id @default(uuid())
+  RecipeId   String
+  MealMenuId String
+  Recipe     Recipe   @relation(fields: [RecipeId], references: [id])
+  MealMenu   MealMenu @relation(fields: [MealMenuId], references: [id])
+}
+
+model Movement {
+  id       String   @id @default(uuid())
+  name     String
+  duration Float
+  time     DateTime
+  dayId    String
+  day      Day      @relation(fields: [dayId], references: [id])
+  SNSId    String?  @unique
+  SNSPost  SNSPost? @relation(fields: [SNSId], references: [id])
+}
+
+model PhysiqueHistory {
+  weight       Float
+  height       Float
+  targetWeight Float
+  day          DateTime
+  userId       String
+  user         UserProfile @relation(fields: [userId], references: [id])
+  SNSId        String?     @unique
+  SNSPost      SNSPost?    @relation(fields: [SNSId], references: [id])
+
+  @@id([day, userId])
+  @@map("WeightHistory")
+}
+
+model BookMark {
+  id     String      @id @default(uuid())
+  name   String
+  userId String
+  user   UserProfile @relation(fields: [userId], references: [id])
+}
+
+model SNSPost {
+  id         String           @id @unique @default(uuid())
+  userId     String
+  postedAt   DateTime         @default(now())
+  post       PhysiqueHistory?
+  Month      Month?
+  MealMenu   MealMenu?
+  Movement   Movement?
+  Likes      Reaction[]
+  monthId    String?
+  mealMenuId String?
+  movementId String?
+}
+
+model Reaction {
+  userId    String   @id
+  reaction  String
+  SNSPostId String?
+  SNSPost   SNSPost? @relation(fields: [SNSPostId], references: [id])
 }

@@ -1,29 +1,22 @@
 import type { UserId } from '$/commonTypesWithClient/ids';
 import type { UserProfileModel } from '$/commonTypesWithClient/models';
 import { userProfileRepo } from '$/repository/userProfileRepo';
-import { userProfileIdParser } from '$/service/idParsers';
-import { randomUUID } from 'crypto';
+import type { Gender } from '@prisma/client';
 
 export const UserProfileUseCase = {
   create: async (
     userId: UserId,
-    height: number,
-    weight: number,
-    age: number,
-    targetWeight: number,
-    gender: string
+    userName: string,
+    birthday: number,
+    gender: Gender
   ): Promise<UserProfileModel> => {
     const userProfileData: UserProfileModel = {
-      id: userProfileIdParser.parse(randomUUID()),
-      userId,
-      height,
-      weight,
-      age,
-      targetWeight,
+      id: userId,
+      userName,
+      birthday,
       gender,
     };
-
-    await userProfileRepo.save(userProfileData);
+    await userProfileRepo.create(userProfileData);
     return userProfileData;
   },
 };
